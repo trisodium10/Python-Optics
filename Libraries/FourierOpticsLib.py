@@ -295,8 +295,8 @@ class Efield:
             self.field = np.ones([grid.Ny,grid.Nx])
             self.grid = grid.copy()  # grid of transverse coordinates of type Coordinate_Grid
         else:
-            self.field = fielddef
-            self.grid = Coordinate_Grid((fielddef.shape,(grid.dy,grid.dx)),inputType='ccd')
+            self.field = fielddef.copy()
+            self.grid = Coordinate_Grid((fielddef.T.shape,(grid.dy,grid.dx)),inputType='ccd')
             # set x and y grid based on provided field definition
         
     def copy(self):
