@@ -261,6 +261,16 @@ class Coordinate_Grid:
 #            NewXset = (self.x[-1,-1],self.dx)
         NewGrid = Coordinate_Grid(NewXset,yset=NewYset,inputType='exact');
         return NewGrid
+    
+    def subgrid(self,factor):
+        """
+        return a portion of this grid
+        based on factor
+        """
+        
+        new_grid = CoordinateGrid((self.x.max()/factor,self.dx))
+        return new_grid
+        
 """
 Electric field class with physical definitions
 wavelength - (in m) wavelength in a vaccuum
@@ -375,6 +385,13 @@ class Efield:
         # returns angular spectrum of the field
         return OpticsFFT(self.field) #,self.grid.fx*self.wavelength,self.grid.fy*self.wavelength
     def translate_FT(self,xshift,yshift):
+        """
+        Translate the field in x and y
+        by the amount xshift and yshift
+        
+        This operation is performed in Fourier space 
+        by applying a linear phase shift
+        """
         self.field = self.spatial_filter(np.exp(1j*2*np.pi*(xshift*self.grid.fx+yshift*self.grid.fy)))
         # use Fourier Transform to translate the field spatially
     def contourf(self,Clevels=np.nan,savefile=''):
@@ -493,34 +510,24 @@ class Efield:
         # between spatial and frequency coodinate frames.
         TotalPower = np.sum(np.abs(self.field)**2)
         return TotalPower
-"""
-Propagate an Electric field through a thin lens
-Ein - input electric field
-f   - lens focal length
-FFz - (optional)
-    - True use Fourier Transform method (default)
-    - False multiply by complex phase
-z   - give the z location of the lens.  If defined, propagation will 
-        automatically be applied to perform operations in the correct plane
-outputs:
-Eout - resulting electric field
-"""
 
-"""
-Thin lens object - FT or propagate an electric field with the object
-Definition:
-    ThinLens(f,radius=np.nan,FFL=np.nan,BFL=np.nan,z=np.nan,dFPP=np.nan,dBPP=np.nan)
-    Inputs (Required):
-        f - focal length of lens
-    Inputs (Optional):
-        radius - apperture radius of the lens (otherwise it is assumed infinite)
-        z - z position of the lens
-        FFL - front focal length (absolute distance from z position of lens to front focal plane)
-        BFL - back focal length (absolute distance from z position of lens to the back focal plane)
-        dFPP - distance from the z position of the lens to the front principle plane
-        dBPP - distance from the z position of the lens to the back principle plane
-"""
+
+
 class ThinLens:
+    """
+    Thin lens object - FT or propagate an electric field with the object
+    Definition:
+        ThinLens(f,radius=np.nan,FFL=np.nan,BFL=np.nan,z=np.nan,dFPP=np.nan,dBPP=np.nan)
+        Inputs (Required):
+            f - focal length of lens
+        Inputs (Optional):
+            radius - apperture radius of the lens (otherwise it is assumed infinite)
+            z - z position of the lens
+            FFL - front focal length (absolute distance from z position of lens to front focal plane)
+            BFL - back focal length (absolute distance from z position of lens to the back focal plane)
+            dFPP - distance from the z position of the lens to the front principle plane
+            dBPP - distance from the z position of the lens to the back principle plane
+    """
     def __init__(self,f,radius=np.nan,FFL=np.nan,BFL=np.nan,z=np.nan,dFPP=np.nan,dBPP=np.nan):
         self.f=f
         self.radius = radius # radius of lens aperature (if it has one)
@@ -602,6 +609,18 @@ class ThinLens:
 #        Ein.fy = Ein.grid.y/(Ein.wavelength*self.f)
         
     def propagate(self,Ein,update=True):
+        """
+        Propagate an Electric field through a thin lens
+        Ein - input electric field
+        f   - lens focal length
+        FFz - (optional)
+            - True use Fourier Transform method (default)
+            - False multiply by complex phase
+        z   - give the z location of the lens.  If defined, propagation will 
+                automatically be applied to perform operations in the correct plane
+        outputs:
+        Eout - resulting electric field
+        """
         # uses a phase mask to propagate from lens front surface to lens back surface
         if update:
             if not np.isnan(self.z):
@@ -620,21 +639,22 @@ class ThinLens:
             MaskOut = np.exp(-1j*np.pi*(grid.r**2)/(wavelength*self.f))
         return MaskOut
         
-"""
-Define an Axicon optical element
-required inputs:
-    angle - angle of axicon cut in radians.  If index of refraction (n) is not provided,
-        this is the divergence angle created by the axicon.  If it is provided
-        it is the angle of the actual material.
-optional inputs:
-    n - index of refraction contrast.  For a freespace optic, this is the actual
-        index of refraction.  However if immersed in something else, it is the ratio
-        of the axicon index to the external medium.  e.g. a glass axicon in water
-        would have and approximate n = 1.5/1.3
-    radius - the aperature radius of the axicon.  Inifinite if not specified.
-    z - the position of the axicon along the optic axis
-"""             
+          
 class Axicon:
+    """
+    Define an Axicon optical element
+    required inputs:
+        angle - angle of axicon cut in radians.  If index of refraction (n) is not provided,
+            this is the divergence angle created by the axicon.  If it is provided
+            it is the angle of the actual material.
+    optional inputs:
+        n - index of refraction contrast.  For a freespace optic, this is the actual
+            index of refraction.  However if immersed in something else, it is the ratio
+            of the axicon index to the external medium.  e.g. a glass axicon in water
+            would have and approximate n = 1.5/1.3
+        radius - the aperature radius of the axicon.  Inifinite if not specified.
+        z - the position of the axicon along the optic axis
+    """   
     def __init__(self,angle,n=np.nan,radius=np.nan,z=np.nan):
         self.angle=angle    # cut angle of axicon
         self.radius=radius  # aperture radius of axicon
@@ -671,30 +691,32 @@ class Axicon:
     def copy(self):
         AxNew = Axicon(self.angle,n=self.n,radius=self.radius,z=self.z)
         return AxNew
-""" 
-Propagate an Electric field through a thick lens
-Ein - input electric field
-C1  - radius of curvature of the first surface
-C2  - radius of curvature of the second surface
-nL  - index of refraction of lens
-nOut- (optional) index of refraction of exit medium (defaults to 1.0)
-outputs:
-Eout - resulting electric field
-"""    
+  
 class ThickLens:
+    """ 
+    Propagate an Electric field through a thick lens
+    Ein - input electric field
+    C1  - radius of curvature of the first surface
+    C2  - radius of curvature of the second surface
+    nL  - index of refraction of lens
+    nOut- (optional) index of refraction of exit medium (defaults to 1.0)
+    outputs:
+    Eout - resulting electric field
+    """  
     def __init__(self,Curvature,nL):
         print ('ThickLens has not been written')
     
-"""
-A flat surface interface between two refractive indicies
-Surface(self,n1,n2,tilt=[0,0],z=np.nan)
-Inputs:
-    n1 - front index of refraction
-    n2 - back index of refraction
-    tilt - slope in [mx,my] of surface
-    z - position of surface
-"""
+
 class Surface:
+    """
+    A flat surface interface between two refractive indicies
+    Surface(self,n1,n2,tilt=[0,0],z=np.nan)
+    Inputs:
+        n1 - front index of refraction
+        n2 - back index of refraction
+        tilt - slope in [mx,my] of surface
+        z - position of surface
+    """
     def __init__(self,n1,n2,tilt=[0,0],z=np.nan):
         self.n1 = n1
         self.n2 = n2
@@ -758,7 +780,7 @@ class SphericalParticle:
         
         return SpH,SpV,SpHV
         
-    def space_mask(self,grid,wavelength,offset=[0.0,0.0],angle_offset=[0.0,0.0]):
+    def space_mask(self,grid,wavelength,offset=None,angle_offset=None):
         """
         % [Sh,Sv,Shv] = space_mask(grid,wavlength,offset=[0.0,0.0],angle_offset=[0.0,0.0])
         % Calculates a virtual complex transmission mask for a particle from Mie
@@ -777,7 +799,11 @@ class SphericalParticle:
         %  For unpolarized light detection add the intensities of the output
         %    Iout = |ExOut|^2 + |EyOut|^2
         
-        """        
+        """   
+        if offset is None:
+            offset = [0.0,0.0]
+        if angle_offset is None:
+            angle_offset = [0.0,0.0]
                 
         Shf,Svf,Shvf = self.freq_mask(grid,wavelength,angle_offset=angle_offset)
         LinearPhaseOffset = np.exp(-1j*2*np.pi*(offset[0]*grid.fx+offset[1]*grid.fy))
@@ -801,31 +827,33 @@ class ShearPlate:
     def __init__(self,n,wedge,thickness):
         print('ShearPlate still needs to be written')
 
-"""
-Detector converts an electric field at a position to a time domain signal.
-Maybe that doesn't make any sense.
-"""
+
 class Detector:
+    """
+    Detector converts an electric field at a position to a time domain signal.
+    Maybe that doesn't make any sense.
+    """
     def __init__(self,radius=np.nan,active_area=np.nan):
         print('Detector has not been written')        
 
-"""
-FP_Etalon:
-Fabret-Perot Etalon with
-FWHM - transmission FWHM
-FSR - Free spectral range (mode spacing)
-center_frequency - design frequency of etalon
-efficiency - peak transmission efficiency (defaults to 1.0)
-tilt - offset tilt angle relative to incident beam (defaults to [0,0]=[xtilt,ytilt])
-radius - apperture function of etalon
-nE - etalon index of refraction (defaults to 1.5)
-InWavelength - if true, all specifications are in vaccuum wavelength, otherwise in frequency (defaults to False)
-z - z position on the optic axis
-
-
-"""   
+ 
 
 class FP_Etalon:
+    """
+    FP_Etalon:
+    Fabret-Perot Etalon with
+    FWHM - transmission FWHM
+    FSR - Free spectral range (mode spacing)
+    center_frequency - design frequency of etalon
+    efficiency - peak transmission efficiency (defaults to 1.0)
+    tilt - offset tilt angle relative to incident beam (defaults to [0,0]=[xtilt,ytilt])
+    radius - apperture function of etalon
+    nE - etalon index of refraction (defaults to 1.5)
+    InWavelength - if true, all specifications are in vaccuum wavelength, otherwise in frequency (defaults to False)
+    z - z position on the optic axis
+    
+    
+    """  
     def __init__(self,FWHM,FSR,center_frequency,efficiency=1.0,tilt=[0,0],radius=np.nan,nE = 1.5,InWavelength=False,z=np.nan):
         
         if InWavelength:        
@@ -929,30 +957,44 @@ class FP_Etalon:
 #Tetalon0 = ((1-RefEtalon)^2./((1-RefEtalon)^2+4*RefEtalon*sin(0.5*deltaEtalon0).^2)).^2;
 #Tetalon1 = ((1-RefEtalon)^2./((1-RefEtalon)^2+4*RefEtalon*sin(0.5*deltaEtalon1).^2)).^2;    
 
-"""
-Generates a Gaussian beam field for 
-inputs (required):
-    grid - coordinate grid for the field
-    radius - list containing x radius and y radius e.g. [Wx,Wy]
-        if it is of length 1, the same waist will be applied to all dimensions
-    wavelength - wavelength of light in m
-inputs (optional):
-    divergence - list containing x and y divergence in radians [Divx,Divy]
-        if it is of length 1, the same divergence will be applied to all dimensions
-        if it is nan, the code will place the waist at this position
-    angle - rotation angle in radians to change the major and minor axis orientation
-    n - index of refraction of the medium.  Assumed to be 1 if not specified
-    z - specifiy a z position of the beam
-    direction - specify a direction the beam is propagating (1 -forward, -1 backward)
-    Norder - Gaussian order (to create flat topped super Gaussians)
-returns
-    Efield containing the Gaussian Beam
-    
-Work needed:
-    Make this work for 1D coodinate grids
-"""
+
+def TranslateXY(obj,grid,xshift,yshift):
+    """
+    Shift an object in x and y by applying a phase offset in the frequency
+    domain
+    obj - 2D array to be shifted
+    grid - Coordinate_Grid for the object
+    xshift - shift in x axis
+    yshift - shift in y axis
+    """
+    LinearPhaseOffset = np.exp(-1j*2*np.pi*(xshift*grid.fx+yshift*grid.fy))
+    ret_obj = OpticsIFFT(OpticsFFT(obj)*LinearPhaseOffset)
+    return ret_obj
+
 
 def GaussianBeam(grid,radius,wavelength,divergence=np.nan,angle=0.0,n=1.0,z=0,direction=1,Norder=1.0):
+    """
+    Generates a Gaussian beam field for 
+    inputs (required):
+        grid - coordinate grid for the field
+        radius - list containing x radius and y radius e.g. [Wx,Wy]
+            if it is of length 1, the same waist will be applied to all dimensions
+        wavelength - wavelength of light in m
+    inputs (optional):
+        divergence - list containing x and y divergence in radians [Divx,Divy]
+            if it is of length 1, the same divergence will be applied to all dimensions
+            if it is nan, the code will place the waist at this position
+        angle - rotation angle in radians to change the major and minor axis orientation
+        n - index of refraction of the medium.  Assumed to be 1 if not specified
+        z - specifiy a z position of the beam
+        direction - specify a direction the beam is propagating (1 -forward, -1 backward)
+        Norder - Gaussian order (to create flat topped super Gaussians)
+    returns
+        Efield containing the Gaussian Beam
+        
+    Work needed:
+        Make this work for 1D coodinate grids
+    """
     
     wavelen = wavelength/n  # use a wavelength adjusted for index of refraction
     # define coordinate system for case where beam principal axes are not aligned
@@ -1065,22 +1107,24 @@ def OpticsIFFT(Ain):
     Aout = np.fft.ifftshift(np.fft.ifft2(np.fft.fftshift(Ain)))*np.sqrt(np.size(Ain))
     return Aout
     
-"""
-Mask = CircFunc(gridset,Radius,invert=False)
-Generates a circ function on the coodinate grid set provided with radius Radius
 
-
-work needed:
-    This is depricated and replaced with Window()
-    Remove calls to this function.
-
-
-"""
-def CircFunc(gridset,Radius,invert=False):
-    Mask = np.ones([gridset.Ny,gridset.Nx])
-    Mask[np.nonzero(gridset.r**2>Radius**2)] = 0;
-    if invert:
-        Mask = 1-Mask
+def CircFunc(grid,Radius,invert=False,xoffset=0,yoffset=0):
+    """
+    Mask = CircFunc(grid,Radius,invert=False,xoffset=0,yoffset=0)
+    Generates a circ function on the coodinate grid set provided with radius Radius
+    and offsets in x and y (xoffset and yoffset)
+    invert = True results in a mask where the inside the circle is set
+    to zero
+    
+    """
+    Mask = Window(np.sqrt((grid.x-xoffset)**2+(grid.y-yoffset)**2),Radius,invert=invert)
+    
+#    print('Call to FourierOpticsLib.CircFunc() is depricated')
+#    print('  Use FourierOpticsLib.Window() instead')
+#    Mask = np.ones([gridset.Ny,gridset.Nx])
+#    Mask[np.nonzero(gridset.r**2>Radius**2)] = 0;
+#    if invert:
+#        Mask = 1-Mask
     return Mask
     
 """
@@ -1142,44 +1186,49 @@ def RectFunc(gridset,Width,freq=False,invert=False,axis=1):
     else:
         print('Error in RectFunc: Unrecognized gridset dimension')
         
-"""
-Window(gridDim,Width,invert=False,shift=0)
 
-Generates a window function on the grid dimension supplied (e.g. grid.fx, grid.r, etc.)
-Replaces CircFunc and RectFunc which are overly specific.  This function can generate
-all those features with less code.
-
-Inputs:
-    gridDim - array of dimension to operate on.
-                for circ function use grid.r, grid.fr
-                    rect function use grid.x, grid.fx
-                    2D rect function, multiply two window functions together.
-    Width - Full width of the window function in coordinate grid space
-    shift - shift the window function off zero centering by this amount
-    invert - create mask with zeros inside the window limits and ones outside
-Output:
-    array mask matched to dimensions of supplied coordinate dimension with
-    transmitting ones and opaque zeros.
-"""
         
 def Window(gridDim,Width,shift=0,invert=False):
+    """
+    Window(gridDim,Width,invert=False,shift=0)
+    
+    Generates a window function on the grid dimension supplied (e.g. grid.fx, grid.r, etc.)
+    Replaces CircFunc and RectFunc which are overly specific.  This function can generate
+    all those features with less code.
+    
+    Inputs:
+        gridDim - array of dimension to operate on.
+                    for circ function use grid.r, grid.fr
+                        rect function use grid.x, grid.fx
+                        2D rect function, multiply two window functions together.
+        Width - Full width of the window function in coordinate grid space
+        shift - shift the window function off zero centering by this amount
+        invert - create mask with zeros inside the window limits and ones outside
+    Output:
+        array mask matched to dimensions of supplied coordinate dimension with
+        transmitting ones and opaque zeros.
+    """
     Mask = np.ones(np.shape(gridDim))
-    Mask[np.nonzero(np.logical_or(gridDim<-(Width/2.0+shift),gridDim>(Width/2.0+shift)))] = 0;
+    Mask[np.nonzero(np.logical_or(gridDim<-(Width/2.0)+shift,gridDim>(Width/2.0)+shift))] = 0;
 #    Mask[np.nonzero(gridDim>(Width/2.0+shift))] = 0;
     if invert:
         Mask = 1.0-Mask
     return Mask
 
-"""
-TelescopeSpider(grid,Router,Rinner,width=0.0)
-Create a mask of a telescope spider on the supplied coordinate grid
-Router - outer radius of the telescope
-Rinner - inner radius of the center mirror
-offset(optional = [0,0]) - offset of secondary mirror in the telescope in [x,y]
-width (optional = 0.0) - width of supports holding the secondary mirror
-rot (optional = 0.0) - Not Implimented yet
-"""
-def TelescopeSpider(grid,Router,Rinner,offset = [0.0,0.0],width=0.0,rot=0.0):
+
+def TelescopeSpider(grid,Router,Rinner,offset=None,width=0.0,rot=0.0):
+    """
+    TelescopeSpider(grid,Router,Rinner,width=0.0)
+    Create a mask of a telescope spider on the supplied coordinate grid
+    Router - outer radius of the telescope
+    Rinner - inner radius of the center mirror
+    offset(optional = [0,0]) - offset of secondary mirror in the telescope in [x,y]
+    width (optional = 0.0) - width of supports holding the secondary mirror
+    rot (optional = 0.0) - Not Implimented yet
+    """
+    if offset is None:
+        offset = [0.0,0.0]
+        
     if rot != 0.0:
         print('rotation not yet implemented in TelescopeSpider')    
     SpMask = Window(grid.r,2*Router)* \
@@ -1188,21 +1237,23 @@ def TelescopeSpider(grid,Router,Rinner,offset = [0.0,0.0],width=0.0,rot=0.0):
     SpMask[np.nonzero(np.abs(grid.y-offset[1])<=width/2.0)] = 0;
     return SpMask
 
-"""
-Create a figure that shows the progressive intensity of a propagating wave.
-AnimatePropagation(Ein,distance=np.nan,z=np.nan,Num=0,dz=0,z0=np.nan,fignum=np.nan)
-Inputs:
-    Ein - electric field to be propagated
-Optional Inputs:
-    distance - total distance the user wants the wave propagated.  Do not use with z.
-    z - propagate the wave to a position z.  Do not use with distance.
-    Num - number of animation frames to create over the propagation distance or z
-    dz - propagation step size between frames
-    z0 - if using z to specify wave's final positon, z0 can be set to set the initial z postion
-    fignum - sets the figure that the animation is placed in.
-"""
+
     
 def AnimatePropagation(Ein,distance=np.nan,z=np.nan,Num=0,dz=0,z0=np.nan,fignum=np.nan):
+    """
+    Create a figure that shows the progressive intensity of a propagating wave.
+    AnimatePropagation(Ein,distance=np.nan,z=np.nan,Num=0,dz=0,z0=np.nan,fignum=np.nan)
+    Inputs:
+        Ein - electric field to be propagated
+    Optional Inputs:
+        distance - total distance the user wants the wave propagated.  Do not use with z.
+        z - propagate the wave to a position z.  Do not use with distance.
+        Num - number of animation frames to create over the propagation distance or z
+        dz - propagation step size between frames
+        z0 - if using z to specify wave's final positon, z0 can be set to set the initial z postion
+        fignum - sets the figure that the animation is placed in.
+    """
+    
     # fignum optional input does not currently work.
     
     # First Option:  plot based on z position using final position z
@@ -1253,22 +1304,24 @@ def AnimatePropagation(Ein,distance=np.nan,z=np.nan,Num=0,dz=0,z0=np.nan,fignum=
     else:
         print ('AnimatePropagation requires more input arguments.  Either z or distance must be defined.')
 
-"""
-backscatter(Field,number=1,AngleLim=np.pi,PhaseFunc=np.nan)
-Simulate incoherent backscatter from an incident electric field by adding
-random phase to the field.
-The scattering phase function can be imparted if it is known.  Also an angle
-limit can be used to avoid over simulation of scattering angles that are not relevant
-to the system detecting the scattering (e.g. set angle limit to 1.5*FS or AS acceptance)
-Field - incident electric field
-number - number of backscatter profiles to create (for MC modeling)
-AngleLim - maximum scattered angle (Half Angle)
-PhaseFunc - backscatter phase function of the particles.  Must have the same
-        coordinates/dimensions as the input Field
-        
-Returns the backscattered electric field (including direction reversal)
-"""
+
 def backscatter(Field,number=1,AngleLim=np.pi,PhaseFunc=np.nan):
+    """
+    backscatter(Field,number=1,AngleLim=np.pi,PhaseFunc=np.nan)
+    Simulate incoherent backscatter from an incident electric field by adding
+    random phase to the field.
+    The scattering phase function can be imparted if it is known.  Also an angle
+    limit can be used to avoid over simulation of scattering angles that are not relevant
+    to the system detecting the scattering (e.g. set angle limit to 1.5*FS or AS acceptance)
+    Field - incident electric field
+    number - number of backscatter profiles to create (for MC modeling)
+    AngleLim - maximum scattered angle (Half Angle)
+    PhaseFunc - backscatter phase function of the particles.  Must have the same
+            coordinates/dimensions as the input Field
+            
+    Returns the backscattered electric field (including direction reversal)
+    """
+
     # reverse propagation direction
     BS_Field = Field.copy();
     BS_Field.direction = -1*BS_Field.direction
@@ -1448,11 +1501,12 @@ def OpticsIFFT1D(Ain):
     return Aout
 
 
-"""
-MedianSort(NumList,n)
-Takes a list of numbers and returns levels of n submedian levels.
-"""
+
 def MedianSort(NumList,n):
+    """
+    MedianSort(NumList,n)
+    Takes a list of numbers and returns levels of n submedian levels.
+    """
     med = np.median(NumList)
     if n > 1 and np.size(NumList) > 1:
         NumListU = NumList[np.nonzero(NumList>med)]
