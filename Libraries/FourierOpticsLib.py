@@ -88,9 +88,9 @@ class Coordinate_Grid:
             self.fr = np.sqrt(self.fx**2+self.fy**2)          
             self.fphi = np.arctan2(self.fy,self.fx)
         elif inputType == 'frequency':
-            Nx1D = np.nanmin([2**(np.ceil(np.log2(xset[0]/xset[1]))),Nmax/2])
+            Nx1D = np.int(np.nanmin([2**(np.ceil(np.log2(xset[0]/xset[1]))),Nmax/2]))
             dx1D = np.double(xset[0])/Nx1D
-            x1D = np.arange(-Nx1D,(Nx1D))*dx1D
+            x1D = np.arange(-Nx1D,Nx1D)*dx1D
             dfx1D = 1.0/(2*Nx1D*dx1D);
             fx1D = np.arange(-Nx1D,Nx1D)*dfx1D
             if yset == 0:
@@ -836,7 +836,30 @@ class Detector:
     def __init__(self,radius=np.nan,active_area=np.nan):
         print('Detector has not been written')        
 
- 
+class Stop:
+    """
+    Aperture stop
+    
+    """
+    
+    def __init__(self,radius,z,grid,offset=None,invert=False):
+        if offset is None:
+            self.x=0
+            self.y=0
+        else:
+            self.x=offset[0]
+            self.y=offset[1]
+            
+        self.mask = CircFunc(grid,radius,invert=invert,xoffset=self.x,yoffset=self.y)
+        self.z = z
+    
+    def load_mask(self,mask):
+        self.mask = mask.copy()
+        
+    def propagate(self,Efield):
+        Efield.propagate_to(self.z)
+        Efield.mask(self.mask)
+        
 
 class FP_Etalon:
     """
