@@ -268,7 +268,7 @@ class Coordinate_Grid:
         based on factor
         """
         
-        new_grid = CoordinateGrid((self.x.max()/factor,self.dx))
+        new_grid = Coordinate_Grid((self.x.max()/factor,self.dx))
         return new_grid
         
 """
@@ -327,7 +327,7 @@ class Efield:
     def propagate_Fresnel(self,distance,trim=True):
         # propagate using Fresnel convolution
         # set trim=False if you want the grid to grow with propagation.  This requires rescaling the grid through and has not been written yet.
-        print('Warning: Efield.propagate_Fresnel() is slow due to slow 2D convolution operation in scipy.signal.convolve2d()')
+        # print('Warning: Efield.propagate_Fresnel() is slow due to slow 2D convolution operation in scipy.signal.convolve2d()')
         Nxh = np.min([np.round(self.wavelength*self.grid.fx[-1,-1]*distance/self.grid.dx),self.grid.Nx/2])
         Nyh = np.min([np.round(self.wavelength*self.grid.fy[-1,-1]*distance/self.grid.dy),self.grid.Ny/2]);
         xh1D = np.arange(-Nxh,Nxh+1)*self.grid.dx
@@ -420,46 +420,47 @@ class Efield:
         # plot the intensity on an implot
         if coord=='spatial':
             # spatial intensity
-            fig1 = plt.figure();
+            fig1,ax = plt.subplots(1,1)
             Ifield = np.abs(self.field)**2
             if scale == 'log':
-                plt.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()),norm=matplotlib.colors.LogNorm())
+                cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()),norm=matplotlib.colors.LogNorm())
             else:
-                plt.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()))
-            plt.xlabel('x')
-            plt.ylabel('y')
-            plt.title(title)
+                cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()))
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            ax.set_title(title)
         else:
             # plot frequency spectrum
-            fig1 = plt.figure();
+            # fig1 = plt.figure();
+            fig1,ax = plt.subplots(1,1)
             Ifield = np.abs(self.angular_spectrum())
             if coord=='angle':
 #                plt.rcParams['mathtext.fontset']="stix"
                 if scale == 'log':
-                    plt.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength),norm=matplotlib.colors.LogNorm())
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength),norm=matplotlib.colors.LogNorm())
                 else:    
-                    plt.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength))
-                plt.xlabel(r'$\alpha_x$')
-                plt.ylabel(r'$\alpha_y$')
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength))
+                ax.set_xlabel(r'$\alpha_x$')
+                ax.set_ylabel(r'$\alpha_y$')
             else:
                 if scale == 'log':
-                    plt.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()),norm=matplotlib.colors.LogNorm())
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()),norm=matplotlib.colors.LogNorm())
                 else:
-                    plt.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()))
-                plt.xlabel('$f_x$')
-                plt.ylabel('$f_y$')            
-            plt.title(title)
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()))
+                ax.set_xlabel('$f_x$')
+                ax.set_ylabel('$f_y$')            
+            ax.set_title(title)
         
         if colorbar:
-            plt.colorbar()
+            plt.colorbar(cb)
 
         if len(savefile) > 0:
             plt.savefig(savefile)
         else:
-            plt.show();
+            plt.show()
         
             
-        return fig1
+        return fig1,ax
     
     def line(self,axis='x',position=0):
         # generate a line section of the electric field
