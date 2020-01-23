@@ -337,15 +337,19 @@ class Efield:
         hxy = np.exp(1j*2*np.pi/self.wavelength*self.direction*distance)/(1j*self.wavelength*self.direction*distance) \
             *np.exp(1j*np.pi/(self.wavelength*self.direction*distance)*(xh**2+yh**2)) #np.sqrt(1.0*np.min([np.size(self.grid.x),np.size(xh)]))
         
+        
 #        ixh0 = np.nonzero(xh1D==0)[0][0]  # index to zero x coordinate in impulse response
 #        iyh0 = np.nonzero(yh1D==0)[0][0]  # index to zero y coordinate in impulse response
 #        ix0 = self.grid.Nx/2+ixh0  # index to zero x coordinate in resultant output
 #        iy0 = self.grid.Ny/2+iyh0  # index to zero y coordinate in resultant output
 #        Outfield = scipy.signal.convolve2d(self.field,hxy,mode='full')*self.grid.dx*self.grid.dy        
         if trim == True:
+            # rescale convolution result based on the number of points contributing (remove edge effects)
+            norm = np.ones(self.field.shape)
+            scale = np.abs(scipy.signal.convolve2d(norm,hxy,mode='same')*self.grid.dx*self.grid.dy)
 #            self.field = Outfield[(-self.grid.Ny/2+iy0):(self.grid.Ny/2+iy0),(-self.grid.Nx/2+ix0):(self.grid.Nx/2+ix0)]
 #            Outfield = convolve(self.field,hxy,mode='constant',cval=0.0)  # use scipy.ndimage convolve library
-            Outfield = scipy.signal.convolve2d(self.field,hxy,mode='same')*self.grid.dx*self.grid.dy       
+            Outfield = scipy.signal.convolve2d(self.field,hxy,mode='same')*self.grid.dx*self.grid.dy/scale
             self.field = Outfield
         else:
 #            ixh0 = np.nonzero(xh1D==0)[0][0]  # index to zero x coordinate in impulse response
