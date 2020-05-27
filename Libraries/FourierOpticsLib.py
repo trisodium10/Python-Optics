@@ -250,7 +250,7 @@ class Coordinate_Grid:
         self.fphi = np.arctan2(self.fy,self.fx)
     def copy(self):
         if self.Ny == 1:
-            NewYset = 0;
+            NewYset = 0
         else:
             NewYset = (self.Ny*self.dy/2.0,self.dy)
 #            NewYset = (self.y[-1,-1],self.dy)
@@ -290,7 +290,7 @@ Work Needed:
 """
 
 class Efield:
-    def __init__(self,wavelength,grid,z=0,n=1.0,direction=1,fielddef=np.nan):
+    def __init__(self,wavelength,grid,z=0,n=1.0,direction=1,fielddef=None):
         self.wavelength=wavelength
         self.n = n  # index of refraction of current medium
         self.z = z  # position along the optic axis
@@ -301,7 +301,7 @@ class Efield:
 #        self.fy = fy
         self.direction = direction
         
-        if np.isnan(fielddef).all():
+        if fielddef is None:
             self.field = np.ones([grid.Ny,grid.Nx])
             self.grid = grid.copy()  # grid of transverse coordinates of type Coordinate_Grid
         else:
@@ -760,21 +760,32 @@ class SphericalParticle:
     def __init__(self,radius,n):
         self.radius=radius
         self.n = n
-    def freq_mask(self,grid,wavelength,angle_offset=[0.0,0.0]):
-        if angle_offset==[0,0]:
+    def freq_mask(self,grid,wavelength,angle_offset=0):
+        
+        if angle_offset == 0:
             scat_ang = grid.fr*wavelength
+            phi = grid.fphi
+        elif angle_offset == np.pi:
+            scat_ang = grid.fr*wavelength+np.pi
+            phi=grid.fphi
         else:
-            scat_ang = np.sqrt((grid.fx*wavelength-angle_offset[0])**2 + \
-                (grid.fy*wavelength-angle_offset[1])**2)
+            scat_ang = grid.fx*wavelength+angle_offset
+            phi = grid.fy*wavelength
+        
+        # if angle_offset==[0,0]:
+        #     scat_ang = grid.fr*wavelength
+        # else:
+        #     scat_ang = np.sqrt((grid.fx*wavelength-angle_offset[0])**2 + \
+        #         (grid.fy*wavelength-angle_offset[1])**2)
                 
         Sp = mie.Mie_AmplitudeMatrix(self.n, 2*np.pi*self.radius/wavelength, scat_ang.flatten())
 #        print('Sp is %s long with %s rows and 0 cols'%(np.size(Sp[0,:]),np.shape(Sp[0,:]))) #[0],np.shape(Sp[0,:])[1]))
         Sp1 = np.reshape(Sp[0,:],(grid.Ny,grid.Nx))
         Sp2 = np.reshape(Sp[1,:],(grid.Ny,grid.Nx))
         
-        SpH = Sp1*np.cos(grid.fphi)**2+Sp2*np.sin(grid.fphi)**2
-        SpV = Sp2*np.cos(grid.fphi)**2+Sp1*np.sin(grid.fphi)**2
-        SpHV = (Sp1-Sp2)*np.cos(grid.fphi)*np.sin(grid.fphi)
+        SpH = Sp1*np.cos(phi)**2+Sp2*np.sin(phi)**2
+        SpV = Sp2*np.cos(phi)**2+Sp1*np.sin(phi)**2
+        SpHV = (Sp1-Sp2)*np.cos(phi)*np.sin(phi)
         
         # Power normalization term for conversion to cartesian coordinates
         Snormalize = -1/(np.cos(grid.fx*wavelength)*np.cos(grid.fy*wavelength))*np.sqrt(grid.dfx*grid.dfy)*wavelength**2/(2*np.pi)    
@@ -785,7 +796,7 @@ class SphericalParticle:
         
         return SpH,SpV,SpHV
         
-    def space_mask(self,grid,wavelength,offset=None,angle_offset=None):
+    def space_mask(self,grid,wavelength,offset=None,angle_offset=0):
         """
         % [Sh,Sv,Shv] = space_mask(grid,wavlength,offset=[0.0,0.0],angle_offset=[0.0,0.0])
         % Calculates a virtual complex transmission mask for a particle from Mie
@@ -807,17 +818,17 @@ class SphericalParticle:
         """   
         if offset is None:
             offset = [0.0,0.0]
-        if angle_offset is None:
-            angle_offset = [0.0,0.0]
+        # if angle_offset is None:
+        #     angle_offset = [0.0,0.0]
                 
         Shf,Svf,Shvf = self.freq_mask(grid,wavelength,angle_offset=angle_offset)
         LinearPhaseOffset = np.exp(-1j*2*np.pi*(offset[0]*grid.fx+offset[1]*grid.fy))
         Shf = Shf*LinearPhaseOffset
         Svf = Svf*LinearPhaseOffset
         Shvf = Shvf*LinearPhaseOffset
-        Sh = OpticsIFFT(Shf);
-        Sv = OpticsIFFT(Svf);
-        Shv = OpticsIFFT(Shvf);
+        Sh = OpticsIFFT(Shf)
+        Sv = OpticsIFFT(Svf)
+        Shv = OpticsIFFT(Shvf)
         return Sh,Sv,Shv
 
     def scatter(self,Ein,offset=[0.0,0.0]):
