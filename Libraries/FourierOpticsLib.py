@@ -65,12 +65,12 @@ class Coordinate_Grid:
             elif not np.isnan(yset).any():
                 Ny1D = np.nanmin([2**(np.ceil(np.log2(yset[0]/yset[1]))),Nmax/2])
                 y1D = np.arange(-Ny1D,(Ny1D))*yset[1]
-                dy1D = yset[0]
+                dy1D = yset[1]
                 dfy1D = 1.0/(2*Ny1D*np.double(yset[1]));
                 fy1D = np.arange(-Ny1D,Ny1D)*dfy1D
             else:
                 y1D = x1D
-                dy1D = xset[0]
+                dy1D = xset[1]
                 dfy1D = dfx1D
                 fy1D = fx1D
             self.x,self.y = np.meshgrid(x1D,y1D)
