@@ -67,7 +67,7 @@ class Coordinate_Grid:
 #            Nx1D = np.nanmin([2**(np.ceil(np.log2(xset[0]/xset[1]))),Nmax/2])
             Nx1D = np.nanmin([np.ceil(xset[0]/xset[1]),Nmax/2])
             x1D = np.arange(-Nx1D,(Nx1D))*xset[1]
-            dfx1D = 1.0/(2*Nx1D*np.double(xset[1]));
+            dfx1D = 1.0/(2*Nx1D*float(xset[1]))
             fx1D = np.arange(-Nx1D,Nx1D)*dfx1D
             if yset == 0:
                 Ny1D = 1
@@ -80,7 +80,7 @@ class Coordinate_Grid:
                 Ny1D = np.nanmin([np.ceil(yset[0]/yset[1]),Nmax/2])
                 y1D = np.arange(-Ny1D,(Ny1D))*yset[1]
                 dy1D = yset[0]
-                dfy1D = 1.0/(2*Ny1D*np.double(yset[1]));
+                dfy1D = 1.0/(2*Ny1D*float(yset[1]))
                 fy1D = np.arange(-Ny1D,Ny1D)*dfy1D
             else:
                 y1D = x1D
@@ -106,9 +106,9 @@ class Coordinate_Grid:
         elif inputType == 'frequency':
 #            Nx1D = np.nanmin([2**(np.ceil(np.log2(xset[0]/xset[1]))),Nmax/2])
             Nx1D = np.nanmin([np.ceil(xset[0]/xset[1]),Nmax/2])
-            dx1D = np.double(xset[0])/Nx1D
+            dx1D = float(xset[0])/Nx1D
             x1D = np.arange(-Nx1D,(Nx1D))*dx1D
-            dfx1D = 1.0/(2*Nx1D*dx1D);
+            dfx1D = 1.0/(2*Nx1D*dx1D)
             fx1D = np.arange(-Nx1D,Nx1D)*dfx1D
             if yset == 0:
                 Ny1D = 1
@@ -119,9 +119,9 @@ class Coordinate_Grid:
             elif not np.isnan(yset).any():
 #                Ny1D = np.nanmin([2**(np.ceil(np.log2(yset[0]/yset[1]))),Nmax/2])
                 Ny1D = np.nanmin([np.ceil(yset[0]/yset[1]),Nmax/2])
-                dy1D = np.double(yset[0])/Ny1D
+                dy1D = float(yset[0])/Ny1D
                 y1D = np.arange(-Ny1D,(Ny1D))*dy1D
-                dfy1D = 1.0/(2*Ny1D*dy1D);
+                dfy1D = 1.0/(2*Ny1D*dy1D)
                 fy1D = np.arange(-Ny1D,Ny1D)*dfy1D
             else:
                 y1D = x1D
@@ -152,14 +152,14 @@ class Coordinate_Grid:
 #            print(xset)
 #            print('')
             x1D = (np.arange(Nx)-np.floor(Nx/2.0))*xset[1][1]
-#            x1D = np.arange(-np.ceil((Nx-1)/2),np.floor((Nx-1)/2)+1)*xset[1][1];
-            dfx1D =  1.0/(Nx*np.double(xset[1][1]))
+#            x1D = np.arange(-np.ceil((Nx-1)/2),np.floor((Nx-1)/2)+1)*xset[1][1]
+            dfx1D =  1.0/(Nx*float(xset[1][1]))
             fx1D = (np.arange(Nx)-np.floor(Nx/2.0))*dfx1D
 #            fx1D = np.arange(-np.ceil((Nx-1)/2),np.floor((Nx-1)/2))*dfx1D
             
             y1D = (np.arange(Ny)-np.floor(Ny/2.0))*xset[1][0]
-#            y1D = np.arange(-np.ceil((Ny-1)/2),np.floor((Ny-1)/2)+1)*xset[1][0];
-            dfy1D =  1.0/(Ny*np.double(xset[1][0]))
+#            y1D = np.arange(-np.ceil((Ny-1)/2),np.floor((Ny-1)/2)+1)*xset[1][0]
+            dfy1D =  1.0/(Ny*float(xset[1][0]))
             fy1D = (np.arange(Ny)-np.floor(Ny/2.0))*dfy1D
 #            fy1D = np.arange(-np.ceil((Ny-1)/2),np.floor((Ny-1)/2))*dfy1D
             
@@ -182,7 +182,7 @@ class Coordinate_Grid:
         elif inputType == 'exact':
             Nx1D = np.nanmin([np.round(xset[0]/xset[1]),Nmax/2])
             x1D = np.arange(-Nx1D,(Nx1D))*xset[1]
-            dfx1D = 1.0/(2*Nx1D*xset[1]);
+            dfx1D = 1.0/(2*Nx1D*xset[1])
             fx1D = np.arange(-Nx1D,Nx1D)*dfx1D
             if yset == 0:
                 Ny1D = 1
@@ -194,7 +194,7 @@ class Coordinate_Grid:
                 Ny1D = np.nanmin([np.round(yset[0]/yset[1]),Nmax/2])
                 y1D = np.arange(-Ny1D,(Ny1D))*yset[1]
                 dy1D = yset[1]
-                dfy1D = 1.0/(2*Ny1D*yset[1]);
+                dfy1D = 1.0/(2*Ny1D*yset[1])
                 fy1D = np.arange(-Ny1D,Ny1D)*dfy1D
             else:
                 y1D = x1D
@@ -277,16 +277,16 @@ class Coordinate_Grid:
 #        self.fphi = np.arctan2(self.fy,self.fx)
     def copy(self):
         if self.Ny == 1:
-            NewYset = 0;
+            NewYset = 0
         else:
             NewYset = (self.Ny*self.dy/2.0,self.dy)
 #            NewYset = (self.y[-1,-1],self.dy)
         if self.Nx == 1:
-            NewXset = 0;
+            NewXset = 0
         else:
             NewXset = (self.Nx*self.dx/2.0,self.dx)
 #            NewXset = (self.x[-1,-1],self.dx)
-        NewGrid = Coordinate_Grid(NewXset,yset=NewYset,inputType='exact');
+        NewGrid = Coordinate_Grid(NewXset,yset=NewYset,inputType='exact')
         return NewGrid
     def r(self):
         x1,y1 = self.space_mesh()
@@ -392,7 +392,7 @@ class Efield:
         # set trim=False if you want the grid to grow with propagation.  This requires rescaling the grid through and has not been written yet.
         print('Warning: Efield.propagate_Fresnel() is slow due to slow 2D convolution operation in scipy.signal.convolve2d()')
         Nxh = np.min([np.round(self.wavelength*self.grid.fx[-1]*distance/self.grid.dx),self.grid.Nx/2])
-        Nyh = np.min([np.round(self.wavelength*self.grid.fy[-1]*distance/self.grid.dy),self.grid.Ny/2]);
+        Nyh = np.min([np.round(self.wavelength*self.grid.fy[-1]*distance/self.grid.dy),self.grid.Ny/2])
         xh1D = np.arange(-Nxh,Nxh+1)*self.grid.dx
         yh1D = np.arange(-Nyh,Nyh+1)*self.grid.dy
         xh,yh = np.meshgrid(xh1D,yh1D)
@@ -461,7 +461,7 @@ class Efield:
         # use Fourier Transform to translate the field spatially
     def contourf(self,Clevels=np.nan,savefile=''):
         # plot the intensity of the electric field
-        fig1 = plt.figure();
+        fig1 = plt.figure()
         Ifield = np.abs(self.field)**2
         if np.isnan(Clevels).any():
             plt.contourf(self.grid.x,self.grid.y,Ifield)
@@ -473,19 +473,19 @@ class Efield:
 #                plt.title('Intensity')
         else:
             plt.contourf(self.grid.x,self.grid.y,Ifield,levels=Clevels)
-        plt.xlabel('x');
-        plt.ylabel('y');
+        plt.xlabel('x')
+        plt.ylabel('y')
         plt.axis('equal')
         if len(savefile) > 0:
             plt.savefig(savefile)
         else:
-            plt.show();
+            plt.show()
         return fig1
     def imshow(self,coord='spatial',savefile='',title=''):
         # plot the intensity on an implot
         if coord=='spatial':
             # spatial intensity
-            fig1 = plt.figure();
+            fig1 = plt.figure()
             Ifield = np.abs(self.field)**2
             plt.imshow(Ifield,extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()))
             plt.xlabel('x')
@@ -493,7 +493,7 @@ class Efield:
             plt.title(title)
         else:
             # plot frequency spectrum
-            fig1 = plt.figure();
+            fig1 = plt.figure()
             Ifield = np.abs(self.angular_spectrum())
             if coord=='angle':
                 plt.rcParams['mathtext.fontset']="stix"
@@ -509,7 +509,7 @@ class Efield:
         if len(savefile) > 0:
             plt.savefig(savefile)
         else:
-            plt.show();
+            plt.show()
             
         return fig1
     
@@ -598,7 +598,7 @@ class ThinLens:
             if np.isnan(dFPP):
                 # if front principle plane is also not defined assume
                 self.FFL = self.f   # front focal length is equal to the effective focal length
-                self.dFPP = 0;      # the front principle plane is at the lens location
+                self.dFPP = 0      # the front principle plane is at the lens location
             else:
                 # if front focal length is not defined but the front principle plane is
                 # use the front PP definition to also obtain the front focal length
@@ -643,7 +643,7 @@ class ThinLens:
                 # if the lens z position is defined, move the input wave to the
                 # lens fourier plane first
                 Ein.propagate_to(self.z-FFz)
-            Ein.field = OpticsFFT(Ein.field);
+            Ein.field = OpticsFFT(Ein.field)
             Ein.z = Ein.z+Ein.direction*(self.FFL+self.BFL)
             Ein.grid.FTrescale(Ein.wavelength*self.f)
         else:
@@ -855,9 +855,9 @@ class SphericalParticle:
             Shf = Shf*LinearPhaseOffset
             Svf = Svf*LinearPhaseOffset
             Shvf = Shvf*LinearPhaseOffset
-        Sh = OpticsIFFT(Shf);
-        Sv = OpticsIFFT(Svf);
-        Shv = OpticsIFFT(Shvf);
+        Sh = OpticsIFFT(Shf)
+        Sv = OpticsIFFT(Svf)
+        Shv = OpticsIFFT(Shvf)
         return Sh,Sv,Shv
 
 
@@ -988,10 +988,10 @@ class FP_Etalon:
         
         return Spectrum
 
-#deltaEtalon0 = 2*pi*nuE/nu0*cos((AngX+thetaFilter1)/FilterIndex)*FilterOrder;
-#deltaEtalon1 = 2*pi*nuE/nu1*cos((AngX+thetaFilter1)/FilterIndex)*FilterOrder;
-#Tetalon0 = ((1-RefEtalon)^2./((1-RefEtalon)^2+4*RefEtalon*sin(0.5*deltaEtalon0).^2)).^2;
-#Tetalon1 = ((1-RefEtalon)^2./((1-RefEtalon)^2+4*RefEtalon*sin(0.5*deltaEtalon1).^2)).^2;    
+#deltaEtalon0 = 2*pi*nuE/nu0*cos((AngX+thetaFilter1)/FilterIndex)*FilterOrder
+#deltaEtalon1 = 2*pi*nuE/nu1*cos((AngX+thetaFilter1)/FilterIndex)*FilterOrder
+#Tetalon0 = ((1-RefEtalon)^2./((1-RefEtalon)^2+4*RefEtalon*sin(0.5*deltaEtalon0).^2)).^2
+#Tetalon1 = ((1-RefEtalon)^2./((1-RefEtalon)^2+4*RefEtalon*sin(0.5*deltaEtalon1).^2)).^2    
 
 """
 Generates a Gaussian beam field for 
@@ -1031,7 +1031,7 @@ def GaussianBeam(grid,radius,wavelength,divergence=np.nan,angle=0.0,n=1.0,z=0,di
         xb = x
         yb = y   
     
-    radius = radius/np.sqrt(np.double(Norder))
+    radius = radius/np.sqrt(float(Norder))
     
     # check for radius with length = 1
     if np.size(radius) == 1:
@@ -1042,32 +1042,32 @@ def GaussianBeam(grid,radius,wavelength,divergence=np.nan,angle=0.0,n=1.0,z=0,di
     #define the x any y components spearately
     #  need to add a segement checking divergence against radius for physical consistency
     if np.isnan(divergence[0]):
-        w0x = radius[0];  # beam waist definition
-        zGx = 0;            # rayleigh range definition
+        w0x = radius[0]  # beam waist definition
+        zGx = 0            # rayleigh range definition
         EbeamX = np.exp((1j*2*np.pi/wavelen*zGx-1j*0.5*np.arctan(wavelen*zGx/(np.pi*w0x**2)))-(xb**2/w0x**2))
     else:
-        w0x = wavelen/(np.pi*divergence[0]);        # waist definition
+        w0x = wavelen/(np.pi*divergence[0])        # waist definition
         if divergence[0] > 0:
-            zGx = -direction*np.pi*w0x**2/wavelen*np.sqrt(np.complex_(radius[0]**2/w0x**2-1));
+            zGx = -direction*np.pi*w0x**2/wavelen*np.sqrt(np.complex_(radius[0]**2/w0x**2-1))
         else:
-            zGx = direction*np.pi*w0x**2/wavelen*np.sqrt(np.complex_(radius[0]**2/w0x**2-1));
+            zGx = direction*np.pi*w0x**2/wavelen*np.sqrt(np.complex_(radius[0]**2/w0x**2-1))
 
-        Rgx = zGx*(1+(np.pi*w0x**2/(wavelen*zGx))**2);
-        EbeamX = np.sqrt(np.abs(w0x)/radius[0])*np.exp((1j*2*np.pi/wavelen*zGx-1j*0.5*np.arctan(wavelen*zGx/(np.pi*w0x**2)))-(xb**2)*(1/radius[0]**2+1j*2*np.pi/(wavelen*2*Rgx)));
+        Rgx = zGx*(1+(np.pi*w0x**2/(wavelen*zGx))**2)
+        EbeamX = np.sqrt(np.abs(w0x)/radius[0])*np.exp((1j*2*np.pi/wavelen*zGx-1j*0.5*np.arctan(wavelen*zGx/(np.pi*w0x**2)))-(xb**2)*(1/radius[0]**2+1j*2*np.pi/(wavelen*2*Rgx)))
 
     if np.isnan(divergence[1]):
-        w0y = radius[1];  # beam waist definition
-        zGy = 0;            # rayleigh range definition
+        w0y = radius[1]  # beam waist definition
+        zGy = 0            # rayleigh range definition
         EbeamY = np.exp((1j*2*np.pi/wavelen*zGy-1j*0.5*np.arctan(wavelen*zGy/(np.pi*w0y**2)))-(yb**2/w0y**2))
     else:
-        w0y = wavelen/(np.pi*divergence[1]);        # waist definition
+        w0y = wavelen/(np.pi*divergence[1])        # waist definition
         if divergence[1] > 0:
-            zGy = -direction*np.pi*w0y**2/wavelen*np.sqrt(np.complex_(radius[1]**2/w0y**2-1));
+            zGy = -direction*np.pi*w0y**2/wavelen*np.sqrt(np.complex_(radius[1]**2/w0y**2-1))
         else:
-            zGy = direction*np.pi*w0y**2/wavelen*np.sqrt(np.complex_(radius[1]**2/w0y**2-1));
+            zGy = direction*np.pi*w0y**2/wavelen*np.sqrt(np.complex_(radius[1]**2/w0y**2-1))
 
-        Rgy = zGy*(1+(np.pi*w0y**2/(wavelen*zGy))**2);
-        EbeamY = np.sqrt(np.abs(w0y)/radius[1])*np.exp((1j*2*np.pi/wavelen*zGy-1j*0.5*np.arctan(wavelen*zGy/(np.pi*w0y**2)))-(yb**2)*(1/radius[1]**2+1j*2*np.pi/(wavelen*2*Rgy)));
+        Rgy = zGy*(1+(np.pi*w0y**2/(wavelen*zGy))**2)
+        EbeamY = np.sqrt(np.abs(w0y)/radius[1])*np.exp((1j*2*np.pi/wavelen*zGy-1j*0.5*np.arctan(wavelen*zGy/(np.pi*w0y**2)))-(yb**2)*(1/radius[1]**2+1j*2*np.pi/(wavelen*2*Rgy)))
 
     Gbeam = Efield(wavelength,grid,z=z,n=1.0,direction=direction,fielddef=EbeamX*EbeamY)
         
@@ -1094,22 +1094,22 @@ def GaussianBeam(grid,radius,wavelength,divergence=np.nan,angle=0.0,n=1.0,z=0,di
 #%  Norder - order of flat top Gaussian (higher -> wider)
 #
 #if ElAng ~= 0
-#    xb = x*cos(ElAng)+y*sin(ElAng);
-#    yb = x*sin(ElAng)-y*cos(ElAng);
+#    xb = x*cos(ElAng)+y*sin(ElAng)
+#    yb = x*sin(ElAng)-y*cos(ElAng)
 #else
-#    xb = x;
-#    yb = y;
+#    xb = x
+#    yb = y
 #end
 #
-#r = sqrt((xb/BeamRadiusX).^2+(yb/BeamRadiusY).^2);
+#r = sqrt((xb/BeamRadiusX).^2+(yb/BeamRadiusY).^2)
 #
-#E0 = EllipticalGaussianBeam(BeamRadiusX,BeamRadiusY,ElAng,lambda,x,y);
+#E0 = EllipticalGaussianBeam(BeamRadiusX,BeamRadiusY,ElAng,lambda,x,y)
 #
-#Sg = zeros(size(r));
+#Sg = zeros(size(r))
 #for ai =0:Norder
-#   Sg = Sg+r.^(2*ai)/factorial(ai); 
+#   Sg = Sg+r.^(2*ai)/factorial(ai) 
 #end
-#Eg = E0.*Sg;
+#Eg = E0.*Sg
         
 """
 Perform a 2DFFT in a way that is conducive with Fourier Optics methods
@@ -1144,7 +1144,7 @@ work needed:
 """
 def CircFunc(gridset,Radius,invert=False):
     Mask = np.ones([gridset.Ny,gridset.Nx])
-    Mask[np.nonzero(gridset.r()**2>Radius**2)] = 0;
+    Mask[np.nonzero(gridset.r()**2>Radius**2)] = 0
     if invert:
         Mask = 1-Mask
     return Mask
@@ -1172,12 +1172,12 @@ work needed:
 #    if gridset.Ny == 1:
 #        Mask = np.ones([gridset.Ny,gridset.Nx])
 #        if freq:     
-#            Mask[np.nonzero(np.abs(gridset.fx)>Width/2.0)] = 0;
+#            Mask[np.nonzero(np.abs(gridset.fx)>Width/2.0)] = 0
 #            if invert:
 #                Mask = 1-Mask
 #            return Mask
 #        else:
-#            Mask[np.nonzero(np.abs(gridset.x)>Width/2.0)] = 0;
+#            Mask[np.nonzero(np.abs(gridset.x)>Width/2.0)] = 0
 #            if invert:
 #                Mask = 1-Mask
 #            return Mask
@@ -1185,23 +1185,23 @@ work needed:
 #        Mask = np.ones([gridset.Ny,gridset.Nx])
 #        if freq:
 #            if axis == 0:
-#                Mask[np.nonzero(np.abs(gridset.fy)>Width/2.0)] = 0;
+#                Mask[np.nonzero(np.abs(gridset.fy)>Width/2.0)] = 0
 #                if invert:
 #                    Mask = 1-Mask
 #                return Mask
 #            else:
-#                Mask[np.nonzero(np.abs(gridset.fx)>Width/2.0)] = 0;
+#                Mask[np.nonzero(np.abs(gridset.fx)>Width/2.0)] = 0
 #                if invert:
 #                    Mask = 1-Mask
 #                return Mask
 #        else:
 #            if axis == 0:
-#                Mask[np.nonzero(np.abs(gridset.y)>Width/2.0)] = 0;
+#                Mask[np.nonzero(np.abs(gridset.y)>Width/2.0)] = 0
 #                if invert:
 #                    Mask = 1-Mask
 #                return Mask
 #            else:
-#                Mask[np.nonzero(np.abs(gridset.x)>Width/2.0)] = 0;
+#                Mask[np.nonzero(np.abs(gridset.x)>Width/2.0)] = 0
 #                if invert:
 #                    Mask = 1-Mask
 #                return Mask
@@ -1230,8 +1230,8 @@ Output:
         
 def Window(gridDim,Width,shift=0,invert=False):
     Mask = np.ones(np.shape(gridDim))
-    Mask[np.nonzero(np.logical_or(gridDim<-(Width/2.0+shift),gridDim>(Width/2.0+shift)))] = 0;
-#    Mask[np.nonzero(gridDim>(Width/2.0+shift))] = 0;
+    Mask[np.nonzero(np.logical_or(gridDim<-(Width/2.0+shift),gridDim>(Width/2.0+shift)))] = 0
+#    Mask[np.nonzero(gridDim>(Width/2.0+shift))] = 0
     if invert:
         Mask = 1.0-Mask
     return Mask
@@ -1251,8 +1251,8 @@ def TelescopeSpider(grid,Router,Rinner,offset = [0.0,0.0],width=0.0,rot=0.0):
     x,y = grid.space_mesh()
     SpMask = Window(grid.r(),2*Router)* \
         Window(np.sqrt((x-offset[0])**2+(y-offset[1])**2),2*Rinner,invert=True)
-    SpMask[np.nonzero(np.abs(x-offset[0])<=width/2.0)] = 0;
-    SpMask[np.nonzero(np.abs(y-offset[1])<=width/2.0)] = 0;
+    SpMask[np.nonzero(np.abs(x-offset[0])<=width/2.0)] = 0
+    SpMask[np.nonzero(np.abs(y-offset[1])<=width/2.0)] = 0
     return SpMask
 
 """
@@ -1337,7 +1337,7 @@ Returns the backscattered electric field (including direction reversal)
 """
 def backscatter(Field,number=1,AngleLim=np.pi,PhaseFunc=np.nan):
     # reverse propagation direction
-    BS_Field = Field.copy();
+    BS_Field = Field.copy()
     BS_Field.direction = -1*BS_Field.direction
     
     
@@ -1381,7 +1381,7 @@ class Coordinate_Grid1D:
         if inputType == 'spatial':
             Nx1D = np.nanmin([2**(np.ceil(np.log2(xset[0]/xset[1]))),Nmax/2])
             x1D = np.arange(-Nx1D,(Nx1D))*xset[1]
-            dfx1D = 1/(2*Nx1D*xset[1]);
+            dfx1D = 1/(2*Nx1D*xset[1])
             fx1D = np.arange(-Nx1D,Nx1D)*dfx1D
             
             self.x=x1D
@@ -1395,7 +1395,7 @@ class Coordinate_Grid1D:
             Nx1D = np.nanmin([2**(np.ceil(np.log2(xset[0]/xset[1]))),Nmax/2])
             dx1D = xset[0]/Nx1D
             x1D = np.arange(-Nx1D,(Nx1D))*dx1D
-            dfx1D = 1/(2*Nx1D*dx1D);
+            dfx1D = 1/(2*Nx1D*dx1D)
             fx1D = np.arange(-Nx1D,Nx1D)*dfx1D
 
             self.x=x1D
@@ -1407,7 +1407,7 @@ class Coordinate_Grid1D:
         elif inputType == 'ccd':
             Nx = xset[0]
             
-            x1D = np.arange(-np.ceil((Nx-1)/2),np.floor((Nx-1)/2)+1)*xset[1];
+            x1D = np.arange(-np.ceil((Nx-1)/2),np.floor((Nx-1)/2)+1)*xset[1]
             dfx1D =  1.0/(Nx*xset[1])
             fx1D = np.arange(-np.ceil((Nx-1)/2),np.floor((Nx-1)/2))*dfx1D
             
@@ -1442,7 +1442,7 @@ class Coordinate_Grid1D:
         self.dfx = self.dx/factor
         
     def copy(self):
-        NewGrid = Coordinate_Grid1D((self.x[-1,-1],self.dx));
+        NewGrid = Coordinate_Grid1D((self.x[-1,-1],self.dx))
         return NewGrid
 
 """
@@ -1477,7 +1477,7 @@ class Efield1D:
         # propagate a distance along the current direction (positive forward, negative backward)
         # using FFT
         if np.abs(distance) > self.wavelength:
-            Hcirc = 1.0*(np.abs(self.grid.fx) < 1/self.wavelength);
+            Hcirc = 1.0*(np.abs(self.grid.fx) < 1/self.wavelength)
             H = Hcirc*np.exp(1j*2*np.pi*distance*self.n/self.wavelength*np.sqrt(1-np.complex_((self.wavelength*self.grid.fx)**2)))
             self.field = OpticsIFFT1D(H*OpticsFFT1D(self.field))
             self.z = self.z+distance*self.direction
@@ -1502,9 +1502,9 @@ class Efield1D:
         else:
             plt.plot(self.grid.x,np.abs(self.field)**2,option)
             
-        plt.xlabel('x');
-        plt.ylabel('Intensity');
-        plt.show();
+        plt.xlabel('x')
+        plt.ylabel('Intensity')
+        plt.show()
         return fig
 def OpticsFFT1D(Ain):
     Aout = np.fft.fftshift(np.fft.fft(np.fft.ifftshift(Ain))) # /np.sqrt(np.size(Ain))
