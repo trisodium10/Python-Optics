@@ -417,19 +417,24 @@ class Efield:
         plt.axis('equal')
         if len(savefile) > 0:
             plt.savefig(savefile)
-        else:
-            plt.show()
+        # else:
+        #     plt.show()
         return fig1
-    def imshow(self,coord='spatial',savefile='',title='',scale='linear',colorbar=True):
+    def imshow(self,coord='spatial',savefile='',title='',scale='linear',colorbar=True,vmin=None,vmax=None):
         # plot the intensity on an implot
+        plt_kwargs = {}
+        if vmin is not None:
+            plt_kwargs['vmin'] = vmin
+        if vmax is not None:
+            plt_kwargs['vmax'] = vmax
         if coord=='spatial':
             # spatial intensity
             fig1,ax = plt.subplots(1,1)
             Ifield = np.abs(self.field)**2
             if scale == 'log':
-                cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()),norm=matplotlib.colors.LogNorm())
+                cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()),norm=matplotlib.colors.LogNorm(**plt_kwargs))
             else:
-                cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()))
+                cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.x.min(),self.grid.x.max(),self.grid.y.min(),self.grid.y.max()),**plt_kwargs)
             ax.set_xlabel('x')
             ax.set_ylabel('y')
             ax.set_title(title)
@@ -441,16 +446,16 @@ class Efield:
             if coord=='angle':
 #                plt.rcParams['mathtext.fontset']="stix"
                 if scale == 'log':
-                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength),norm=matplotlib.colors.LogNorm())
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength),norm=matplotlib.colors.LogNorm(**plt_kwargs))
                 else:    
-                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength))
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min()*self.wavelength,self.grid.fx.max()*self.wavelength,self.grid.fy.min()*self.wavelength,self.grid.fy.max()*self.wavelength),**plt_kwargs)
                 ax.set_xlabel(r'$\alpha_x$')
                 ax.set_ylabel(r'$\alpha_y$')
             else:
                 if scale == 'log':
-                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()),norm=matplotlib.colors.LogNorm())
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()),norm=matplotlib.colors.LogNorm(**plt_kwargs))
                 else:
-                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()))
+                    cb = ax.imshow(Ifield[::-1,:],extent=(self.grid.fx.min(),self.grid.fx.max(),self.grid.fy.min(),self.grid.fy.max()),**plt_kwargs)
                 ax.set_xlabel('$f_x$')
                 ax.set_ylabel('$f_y$')            
             ax.set_title(title)
@@ -460,8 +465,8 @@ class Efield:
 
         if len(savefile) > 0:
             plt.savefig(savefile)
-        else:
-            plt.show()
+        # else:
+            # plt.show()
         
             
         return fig1,ax
@@ -1318,7 +1323,7 @@ def AnimatePropagation(Ein,distance=np.nan,z=np.nan,Num=0,dz=0,z0=np.nan,fignum=
         plt.xlabel('x position [m]')
         plt.ylabel('y position [m]')
         anim = animation.FuncAnimation(fignum, animate_z, frames=np.size(z_array),fargs=(Ein,z_array),repeat=False)
-        plt.show()
+        # plt.show()
         
         # Second Option:  plot based on a propagation distance
     elif not np.isnan(distance):
@@ -1338,7 +1343,7 @@ def AnimatePropagation(Ein,distance=np.nan,z=np.nan,Num=0,dz=0,z0=np.nan,fignum=
         plt.xlabel('x position [m]')
         plt.ylabel('y position [m]')
         anim = animation.FuncAnimation(fignum, animate_d, frames=np.size(z_array),fargs=(Ein,z_array,z0),repeat=False)
-        plt.show()
+        # plt.show()
 
     else:
         print ('AnimatePropagation requires more input arguments.  Either z or distance must be defined.')
@@ -1529,7 +1534,7 @@ class Efield1D:
             
         plt.xlabel('x')
         plt.ylabel('Intensity')
-        plt.show()
+        # plt.show()
         return fig
 def OpticsFFT1D(Ain):
     Aout = np.fft.fftshift(np.fft.fft(np.fft.ifftshift(Ain))) # /np.sqrt(np.size(Ain))
